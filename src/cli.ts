@@ -1,15 +1,21 @@
 #!/usr/bin/env node
 import { program } from 'commander';
 import chalk from 'chalk';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import { resolveRefs } from './resolver.js';
 import { sendMessage } from './gateway.js';
 import { formatResponse } from './formatter.js';
 import { readStdin } from './stdin.js';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'));
+
 program
   .name('clawpipe')
   .description('Talk to your OpenClaw agent from the terminal — with file and folder context.')
-  .version('0.1.0')
+  .version(pkg.version)
   .argument('[message...]', 'Message to send (use @path to include file/folder context)')
   .option('-s, --session <id>', 'Target a specific session', 'main')
   .option('-r, --raw', 'Plain output — no colors, no spinner (good for piping)')
