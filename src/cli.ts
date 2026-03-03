@@ -112,15 +112,28 @@ complete -o default -F _clawpipe clawpipe`);
       break;
     case 'zsh':
       console.log(`# clawpipe zsh completion
+# Add @ as a word character so zsh splits on it
 _clawpipe() {
-  local -a args
-  if [[ "$PREFIX" == @* ]]; then
-    local fileprefix=\${PREFIX#@}
-    local files=($(ls -d \${fileprefix}* 2>/dev/null))
-    compadd -P @ -- \${files[@]}
-  else
-    _arguments '*:message:' '--session[Target session]:session:' '--raw[Plain output]' '--model[Override model]:model:'
+  local -a flags
+  flags=(
+    '(-s --session)'{-s,--session}'[Target session]:session:'
+    '(-r --raw)'{-r,--raw}'[Plain output]'
+    '(-m --model)'{-m,--model}'[Override model]:model:'
+    '--completions[Shell completions]:shell:(bash zsh fish)'
+    '(-h --help)'{-h,--help}'[Show help]'
+    '(-V --version)'{-V,--version}'[Show version]'
+  )
+
+  # Check if current word starts with @
+  if [[ "\$words[\$CURRENT]" == @* ]]; then
+    # Strip the @ prefix, complete files, then re-add @
+    local fileprefix="\${words[\$CURRENT]#@}"
+    compset -P '@'
+    _files -W "\$PWD"
+    return
   fi
+
+  _arguments -s \$flags '*:message:'
 }
 compdef _clawpipe clawpipe`);
       break;
