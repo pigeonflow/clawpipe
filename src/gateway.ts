@@ -45,9 +45,13 @@ export async function sendMessage(message: string, opts: SendOptions): Promise<s
 
     spinner?.stop();
 
-    // Parse JSON output
+    // Parse JSON output from `openclaw agent --json`
     try {
       const data = JSON.parse(result);
+      // openclaw agent --json returns { result: { payloads: [{ text }] } }
+      if (data.result?.payloads?.[0]?.text) {
+        return data.result.payloads[0].text;
+      }
       return data.response || data.text || data.message || result.trim();
     } catch {
       return result.trim();
